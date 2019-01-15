@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace EVRC
 {
+    using static KeyboardInterface;
+
     /**
      * A button type that uses a ControlButtonAsset and outputs keyboard commands
      * to control ED.
@@ -88,41 +88,12 @@ namespace EVRC
             }
         }
 
-        public override void Activate()
+        protected override Unpress Activate()
         {
             var control = controlButtonAsset.GetControl();
-
-            var bindings = EDStateManager.instance.controlBindings;
-            if (bindings == null)
-            {
-                Debug.LogWarning("Control bindings not loaded");
-            }
-            else
-            {
-                var keyBinding = bindings.GetKeyboardKeybinding(control);
-                string key = "";
-                string[] modifiers = null;
-                if (keyBinding == null)
-                {
-                    if (!controlButtonAsset.GetDefaultKeycombo(ref key, ref modifiers))
-                    {
-                        Debug.LogWarningFormat("Control was not bound and there is no default keycombo to fallback to");
-                        return;
-                    }
-                }
-                else
-                {
-                    key = keyBinding.Value.Key;
-                    modifiers = keyBinding.Value.Modifiers.Select(mod => mod.Key).ToArray();
-                }
-
-                if (!KeyboardInterface.Send(key, modifiers))
-                {
-                    Debug.LogWarningFormat(
-                        "Could not send keypress {0}, did not understand one or more of the keys",
-                        KeyboardInterface.KeyComboDebugString(key, modifiers));
-                }
-            }
+            KeyCombo? defaultKeycombo = controlButtonAsset.GetDefaultKeycombo();
+            var unpress = CallbackPress(EDControlBindings.GetControlButton(control, defaultKeycombo));
+            return () => unpress();
         }
     }
 }
