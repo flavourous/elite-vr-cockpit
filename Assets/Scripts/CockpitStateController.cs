@@ -18,7 +18,7 @@ namespace EVRC
         }
         [SerializeField]
         [Tooltip("Is menu mode on: Enables trackpad menu controls for controlling game menus")]
-        private bool _menuMode = false;
+        private bool _menuMode = true;
         public bool menuMode
         {
             get
