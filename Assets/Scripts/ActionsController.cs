@@ -17,6 +17,8 @@ namespace EVRC
         public float trackpadCenterButtonRadius = 0.5f;
         [Range(0f, 2f)]
         public float trackpadDirectionInterval = 1f;
+        [Range(0f, 1f)]
+        public float joystickDirectionInterval = 0.8f;
 
         public enum Button
         {
@@ -93,12 +95,7 @@ namespace EVRC
         };
 
         protected Action UnpressTouchpadHandler;
-        protected Dictionary<Hand, short> trackpadTouchingCoroutineId = new Dictionary<Hand, short>()
-        {
-            { Hand.Left, 0 },
-            { Hand.Right, 0 },
-        };
-
+     
         public static Events.Event<ButtonPress> TriggerPress = new Events.Event<ButtonPress>();
         public static Events.Event<ButtonPress> TriggerUnpress = new Events.Event<ButtonPress>();
         public static Events.Event<ButtonPress> GrabPress = new Events.Event<ButtonPress>();
@@ -117,16 +114,37 @@ namespace EVRC
             Right,
         }
 
+        [Flags]
         public enum Direction : byte
         {
-            Up,
-            Right,
-            Down,
-            Left
+            None=0,
+            Up=1,
+            Right=2,
+            Down=4,
+            Left=8
         }
+
+        protected class AxisCoroutine
+        {
+            public AxisCoroutine(Func<uint, Hand, short, IEnumerator> coroutine)
+            {
+                Coroutine = coroutine;
+            }
+            public Func<uint, Hand, short, IEnumerator> Coroutine { get; }
+            public Dictionary<Hand, short> Id { get; } = new Dictionary<Hand, short>
+            {
+                { Hand.Left, 0},
+                { Hand.Right, 0}
+            };
+        }
+
+        protected Dictionary<EVRControllerAxisType, AxisCoroutine> axisCoroutines = new Dictionary<EVRControllerAxisType, AxisCoroutine>();
 
         void OnEnable()
         {
+            axisCoroutines[EVRControllerAxisType.k_eControllerAxis_TrackPad] = new AxisCoroutine(WhileTouchingTouchpadAxis0);
+            axisCoroutines[EVRControllerAxisType.k_eControllerAxis_Joystick] = new AxisCoroutine(WhileTouchingJoystickAxis0);
+
             Events.System(EVREventType.VREvent_ButtonPress).Listen(OnButtonPress);
             Events.System(EVREventType.VREvent_ButtonUnpress).Listen(OnButtonUnpress);
             Events.System(EVREventType.VREvent_ButtonTouch).Listen(OnButtonTouch);
@@ -181,7 +199,7 @@ namespace EVRC
                 if (err == ETrackedPropertyError.TrackedProp_Success)
                 {
                     var axisType = (EVRControllerAxisType)axisTypeInt;
-                    if (axisType == EVRControllerAxisType.k_eControllerAxis_TrackPad || axisType == EVRControllerAxisType.k_eControllerAxis_Joystick)
+                    if (axisType == EVRControllerAxisType.k_eControllerAxis_TrackPad)
                     {
                         var state = new VRControllerState_t();
                         var size = (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VRControllerState_t));
@@ -274,11 +292,9 @@ namespace EVRC
                 var axisTypeInt = OpenVR.System.GetInt32TrackedDeviceProperty(ev.trackedDeviceIndex, ETrackedDeviceProperty.Prop_Axis0Type_Int32, ref err);
                 if (err == ETrackedPropertyError.TrackedProp_Success)
                 {
-                    var axisType = (EVRControllerAxisType)axisTypeInt;
-                    if (axisType == EVRControllerAxisType.k_eControllerAxis_TrackPad || axisType == EVRControllerAxisType.k_eControllerAxis_Joystick)
+                    if(axisCoroutines.TryGetValue((EVRControllerAxisType)axisTypeInt, out var coroutine))
                     {
-                        trackpadTouchingCoroutineId[hand]++;
-                        StartCoroutine(WhileTouchingTouchpadAxis0(ev.trackedDeviceIndex, hand, trackpadTouchingCoroutineId[hand]));
+                        StartCoroutine(coroutine.Coroutine(ev.trackedDeviceIndex, hand, ++coroutine.Id[hand]));
                     }
                 }
             }
@@ -291,10 +307,14 @@ namespace EVRC
 
             if (button == EVRButtonId.k_EButton_SteamVR_Touchpad)
             {
-                if (trackpadTouchingCoroutineId.ContainsKey(hand))
+                var err = ETrackedPropertyError.TrackedProp_Success;
+                var axisTypeInt = OpenVR.System.GetInt32TrackedDeviceProperty(ev.trackedDeviceIndex, ETrackedDeviceProperty.Prop_Axis0Type_Int32, ref err);
+                if (err == ETrackedPropertyError.TrackedProp_Success)
                 {
-                    // Increment the Id so the coroutine stops
-                    trackpadTouchingCoroutineId[hand]++;
+                    if (axisCoroutines.TryGetValue((EVRControllerAxisType)axisTypeInt, out var coroutine))
+                    {
+                        coroutine.Id[hand]++;
+                    }
                 }
             }
         }
@@ -334,6 +354,48 @@ namespace EVRC
             }
         }
 
+        private IEnumerator WhileTouchingJoystickAxis0(uint deviceIndex, Hand hand, short coroutineId)
+        {
+            var vr = OpenVR.System;
+            var state = new VRControllerState_t();
+            var size = (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VRControllerState_t));
+
+            Direction currentDirection = Direction.None;
+            while (vr.GetControllerState(deviceIndex, ref state, size))
+            {
+                var pos = ControllerAxisToVector2(state.rAxis0);
+                Direction newDirection = Direction.None;
+
+                if (pos.x > joystickDirectionInterval) newDirection |= Direction.Right;
+                if (pos.x < -joystickDirectionInterval) newDirection |= Direction.Left;
+                if (pos.y > joystickDirectionInterval) newDirection |= Direction.Up;
+                if (pos.y < -joystickDirectionInterval) newDirection |= Direction.Down;
+
+                Direction differenceInDirection = currentDirection ^ newDirection;
+
+                foreach(Direction d in new[] { 1, 2, 4, 8 })
+                {
+                    if(differenceInDirection.HasFlag(d))
+                    {
+                        var isDown = newDirection.HasFlag(d);
+                        var btn = new DirectionActionsPress(hand, DirectionAction.D2, d, isDown);
+                        DirectionActionPress.Send(btn);
+                    }
+                }
+
+                currentDirection = newDirection;
+
+                yield return null;
+
+                if (axisCoroutines[EVRControllerAxisType.k_eControllerAxis_Joystick].Id[hand] != coroutineId)
+                {
+                    yield break;
+                }
+            }
+
+            Debug.LogWarningFormat("Failed to get controller state for device {0}", deviceIndex);
+        }
+
         private IEnumerator WhileTouchingTouchpadAxis0(uint deviceIndex, Hand hand, short coroutineId)
         {
             var vr = OpenVR.System;
@@ -371,7 +433,7 @@ namespace EVRC
 
                 yield return null;
 
-                if (trackpadTouchingCoroutineId[hand] != coroutineId)
+                if (axisCoroutines[EVRControllerAxisType.k_eControllerAxis_TrackPad].Id[hand] != coroutineId)
                 {
                     yield break;
                 }
