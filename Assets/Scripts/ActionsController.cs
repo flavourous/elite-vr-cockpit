@@ -379,7 +379,8 @@ namespace EVRC
                     {
                         var isDown = newDirection.HasFlag(d);
                         var btn = new DirectionActionsPress(hand, DirectionAction.D2, d, isDown);
-                        DirectionActionPress.Send(btn);
+                        if (isDown) DirectionActionPress.Send(btn);
+                        else DirectionActionUnpress.Send(btn);
                     }
                 }
 
