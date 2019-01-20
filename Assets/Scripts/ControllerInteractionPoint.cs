@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Valve.VR;
 
 namespace EVRC
 {
     using ButtonPress = ActionsController.ButtonPress;
     using Hand = TrackedHand.Hand;
+    using Events = SteamVR_Events;
 
     public class ControllerInteractionPoint : MonoBehaviour
     {
@@ -22,6 +24,18 @@ namespace EVRC
 
         private float lastGrabPressTime;
 
+        public struct GrabableGrab
+        {
+            public Hand hand;
+            public bool grabbed;
+
+            public GrabableGrab(Hand hand, bool grabbed)
+            {
+                this.hand = hand;
+                this.grabbed = grabbed;
+            }
+        }
+
         public Hand Hand
         {
             get
@@ -29,6 +43,9 @@ namespace EVRC
                 return trackedHand.hand;
             }
         }
+
+        public static Events.Event<GrabableGrab> GrabbableGrabed = new Events.Event<GrabableGrab>();
+        public static Events.Event<GrabableGrab> GrabbableUnGrabed = new Events.Event<GrabableGrab>();
 
         void Start()
         {
@@ -191,6 +208,7 @@ namespace EVRC
                 if (canGrab && grabable.Grabbed(this))
                 {
                     grabbing.Add(grabable);
+                    GrabbableGrabed.Send(new GrabableGrab(trackedHand.hand, true));
                 }
             }
 
@@ -204,6 +222,8 @@ namespace EVRC
             var delta = Time.time - lastGrabPressTime;
             var isUnderGrabToggleTiming = delta < toggleGrabPressTiming;
 
+            bool wasUngrabbed = false;
+
             foreach (IGrabable grabable in grabbing)
             {
                 // If we are toggle grabbing the object we should also remove it from the list
@@ -211,6 +231,7 @@ namespace EVRC
                 {
                     toggleGrabbing.Remove(grabable);
                     grabable.Ungrabbed(this);
+                    wasUngrabbed = true;
                 }
                 // if this might be a grab toggle and the surface allows it,
                 // add it to the toggle-grabbing list. otherwise, whether it's
@@ -223,6 +244,7 @@ namespace EVRC
                 else
                 {
                     grabable.Ungrabbed(this);
+                    wasUngrabbed = true;
                 }
             }
 
@@ -230,6 +252,11 @@ namespace EVRC
             foreach (var grabable in toggleGrabbing)
             {
                 grabbing.Add(grabable);
+            }
+
+            if(wasUngrabbed)
+            {
+                GrabbableUnGrabed.Send(new GrabableGrab(trackedHand.hand, grabbing.Count > 0));
             }
         }
 
