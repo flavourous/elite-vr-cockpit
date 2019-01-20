@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731713, g: 0.13414736, b: 0.12107852, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1174,6 +1174,51 @@ Transform:
   m_Father: {fileID: 1074601785}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &193140705
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 193140706}
+  - component: {fileID: 193140707}
+  m_Layer: 0
+  m_Name: VirtualEmptyLeftHand
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &193140706
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193140705}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1209927451}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &193140707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193140705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2805ed5c711f7d4983008d11faa132b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  output: {fileID: 2010787711}
+  hand: 2
 --- !u!1 &200242373
 GameObject:
   m_ObjectHideFlags: 0
@@ -1367,7 +1412,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &253296872
 GameObject:
@@ -1606,6 +1651,54 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -53}
   m_SizeDelta: {x: 0, y: 10}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!1 &301609358
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 301609360}
+  - component: {fileID: 301609359}
+  m_Layer: 0
+  m_Name: '[vJoy 2]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &301609359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 301609358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b2b41d4435c11d4bbc660d4303e25ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  joystickDeadzoneDegrees: 5
+  joystickMaxDegrees: 45
+  throttleDeadzonePercentage: 5
+  directionalThrustersDeadzonePercentage: 5
+  deviceId: 2
+--- !u!4 &301609360
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 301609358}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &316706169
 GameObject:
   m_ObjectHideFlags: 0
@@ -1980,7 +2073,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4301093569976084, guid: 0a61030a4e57eed42bdb4357624625f4, type: 3}
       propertyPath: m_RootOrder
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 114805817044710098, guid: 0a61030a4e57eed42bdb4357624625f4,
         type: 3}
@@ -4576,7 +4669,7 @@ Transform:
   - {fileID: 2135082578}
   - {fileID: 409957619}
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &721367168
 MonoBehaviour:
@@ -5851,6 +5944,51 @@ MonoBehaviour:
   renderMode: 0
   renderCamera: {fileID: 0}
   width: 1
+--- !u!1 &922579666
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 922579667}
+  - component: {fileID: 922579668}
+  m_Layer: 0
+  m_Name: VirtualEmptyRightHand
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &922579667
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 922579666}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1209927451}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &922579668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 922579666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2805ed5c711f7d4983008d11faa132b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  output: {fileID: 301609359}
+  hand: 2
 --- !u!1001 &925449729
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6232,7 +6370,7 @@ Transform:
   - {fileID: 634545532}
   - {fileID: 561356786}
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &950015984
 MonoBehaviour:
@@ -7256,7 +7394,7 @@ Transform:
   - {fileID: 133554321}
   - {fileID: 1901760475}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1074601786
 MonoBehaviour:
@@ -7411,7 +7549,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1088075026
 PrefabInstance:
@@ -8322,6 +8460,8 @@ Transform:
   - {fileID: 1917759322}
   - {fileID: 1915806752}
   - {fileID: 1498528502}
+  - {fileID: 193140706}
+  - {fileID: 922579667}
   m_Father: {fileID: 1074601785}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -8515,7 +8655,7 @@ Transform:
   - {fileID: 1306814049}
   - {fileID: 2033959599}
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1306814048
 GameObject:
@@ -10825,7 +10965,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4301093569976084, guid: 0a61030a4e57eed42bdb4357624625f4, type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 114805817044710098, guid: 0a61030a4e57eed42bdb4357624625f4,
         type: 3}
@@ -12083,6 +12223,7 @@ MonoBehaviour:
   menuButton: 1
   trackpadCenterButtonRadius: 0.4
   trackpadDirectionInterval: 0.25
+  joystickDirectionInterval: 0.8
 --- !u!4 &1840785752
 Transform:
   m_ObjectHideFlags: 0
@@ -13519,7 +13660,7 @@ GameObject:
   - component: {fileID: 2010787712}
   - component: {fileID: 2010787711}
   m_Layer: 0
-  m_Name: '[vJoy]'
+  m_Name: '[vJoy 1]'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13541,6 +13682,7 @@ MonoBehaviour:
   joystickMaxDegrees: 45
   throttleDeadzonePercentage: 5
   directionalThrustersDeadzonePercentage: 5
+  deviceId: 1
 --- !u!4 &2010787712
 Transform:
   m_ObjectHideFlags: 0

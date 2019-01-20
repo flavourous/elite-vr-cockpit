@@ -16,7 +16,7 @@ namespace EVRC
             Negative = -1,
         }
 
-        public vJoyInterface output;
+        public  vJoyInterface output;
 
         public void Positive()
         {

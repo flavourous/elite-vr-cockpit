@@ -13,7 +13,6 @@ namespace EVRC.DesktopUI
         {
             textMesh = GetComponent<TMPro.TextMeshProUGUI>();
             vJoyInterface.VJoyStatusChange.Listen(OnStatusChange);
-            Refresh(vJoyInterface.vJoyStatus);
         }
 
         private void OnDisable()
@@ -21,14 +20,9 @@ namespace EVRC.DesktopUI
             vJoyInterface.VJoyStatusChange.Remove(OnStatusChange);
         }
 
-        private void OnStatusChange(VJoyStatus status)
+        private void OnStatusChange(vJoyInterface.VJoyStatusChanged status)
         {
-            Refresh(status);
-        }
-
-        private void Refresh(VJoyStatus status)
-        {
-            textMesh.text = GetStatusText(status);
+            textMesh.text = $"#{status.deviceId}: {GetStatusText(status.status)}";
         }
 
         private string GetStatusText(VJoyStatus status)
@@ -50,7 +44,7 @@ namespace EVRC.DesktopUI
                 case VJoyStatus.DeviceNotAquired:
                     return "Failed to aquire device";
                 case VJoyStatus.Ready:
-                    return string.Format("Connected to device #{0}", vJoyInterface.deviceId);
+                    return "Connected to device";
                 default:
                     return "Unknown";
             }

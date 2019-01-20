@@ -22,6 +22,18 @@ namespace EVRC
             Ready,
         }
 
+        public struct VJoyStatusChanged
+        {
+            public VJoyStatus status;
+            public uint deviceId;
+
+            public VJoyStatusChanged(VJoyStatus status, uint deviceId)
+            {
+                this.status = status;
+                this.deviceId = deviceId;
+            }
+        }
+
         public enum HatDirection : byte
         {
             Up = 0,
@@ -39,13 +51,14 @@ namespace EVRC
         public float throttleDeadzonePercentage = 0f;
         [Range(0f, 100f)]
         public float directionalThrustersDeadzonePercentage = 0f;
+        [Range(1, 15)]
+        public uint deviceId = 1;
 
         private vJoy vjoy;
         private vJoy.JoystickState iReport = new vJoy.JoystickState();
 
-        public static uint deviceId = 1;
-        public static VJoyStatus vJoyStatus { get; private set; } = VJoyStatus.Unknown;
-        public static SteamVR_Events.Event<VJoyStatus> VJoyStatusChange = new SteamVR_Events.Event<VJoyStatus>();
+        public VJoyStatus vJoyStatus { get; private set; } = VJoyStatus.Unknown;
+        public static SteamVR_Events.Event<VJoyStatusChanged> VJoyStatusChange = new SteamVR_Events.Event<VJoyStatusChanged>();
 
         private VirtualJoystick.StickAxis stickAxis = VirtualJoystick.StickAxis.Zero;
         private Virtual6DOFController.ThrusterAxis thrusterAxis = Virtual6DOFController.ThrusterAxis.Zero;
@@ -61,7 +74,7 @@ namespace EVRC
         void SetStatus(VJoyStatus status)
         {
             vJoyStatus = status;
-            VJoyStatusChange.Send(status);
+            VJoyStatusChange.Send(new VJoyStatusChanged(status, deviceId));
         }
 
         void OnEnable()

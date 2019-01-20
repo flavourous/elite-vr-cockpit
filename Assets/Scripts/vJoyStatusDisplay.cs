@@ -20,7 +20,6 @@ namespace EVRC
         private void OnEnable()
         {
             vJoyInterface.VJoyStatusChange.Listen(OnStatusChange);
-            Refresh(vJoyInterface.vJoyStatus);
         }
 
         private void OnDisable()
@@ -28,13 +27,9 @@ namespace EVRC
             vJoyInterface.VJoyStatusChange.Remove(OnStatusChange);
         }
 
-        private void OnStatusChange(VJoyStatus status)
+        private void OnStatusChange(vJoyInterface.VJoyStatusChanged args)
         {
-            Refresh(status);
-        }
-
-        private void Refresh(VJoyStatus status)
-        {
+            var status = args.status;
             if (notInstalled)
             {
                 notInstalled.SetActive(status == VJoyStatus.NotInstalled);

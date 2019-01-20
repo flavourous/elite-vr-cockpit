@@ -12,18 +12,49 @@ namespace EVRC
         private ActionsControllerPressManager actionsPressManager;
 
         // Map of abstracted BtnAction presses to vJoy joystick button numbers
-        private static Dictionary<BtnAction, uint> joyBtnMap = new Dictionary<BtnAction, uint>()
+        private static Dictionary<Hand, Dictionary<BtnAction, uint>> joyBtnMap = new Dictionary<Hand, Dictionary<BtnAction, uint>>
         {
-            { BtnAction.Trigger, 10 },
-            { BtnAction.Secondary, 11 },
-            { BtnAction.Alt, 12 },
-            { BtnAction.D1, 13 },
-            { BtnAction.D2, 14 },
+            {
+                Hand.Left,
+                new Dictionary<BtnAction, uint>
+                {
+                    { BtnAction.Trigger, 1 },
+                    { BtnAction.Secondary, 2 },
+                    { BtnAction.Alt, 3 },
+                    { BtnAction.D1, 4 },
+                    { BtnAction.D2, 5 }
+                }
+            },
+            {
+                Hand.Right,
+                new Dictionary<BtnAction, uint>
+                {
+                    { BtnAction.Trigger, 7 },
+                    { BtnAction.Secondary, 8 },
+                    { BtnAction.Alt, 9 },
+                    { BtnAction.D1, 10 },
+                    { BtnAction.D2, 11 }
+                }
+            },
         };
-        private static Dictionary<DirectionAction, uint> joyHatMap = new Dictionary<DirectionAction, uint>()
+        private static Dictionary<Hand, Dictionary<DirectionAction, uint>> joyHatMap = new Dictionary<Hand, Dictionary<DirectionAction, uint>>
         {
-            { DirectionAction.D1, 3 },
-            { DirectionAction.D2, 4 },
+            {
+                Hand.Left,
+                new Dictionary<DirectionAction, uint>
+                {
+                    { DirectionAction.D1, 1 },
+                    { DirectionAction.D2, 2 }
+                }
+            },
+            {
+                Hand.Right,
+                new Dictionary<DirectionAction, uint>
+                {
+                    { DirectionAction.D1, 3 },
+                    { DirectionAction.D2, 4 },
+                }
+            }
         };
         private static Dictionary<Direction, HatDirection> directionMap = new Dictionary<Direction, HatDirection>()
         {
@@ -88,7 +119,7 @@ namespace EVRC
 
         private UnpressHandlerDelegate<ButtonActionsPress> OnActionPress(ButtonActionsPress pEv)
         {
-            if (pEv.hand == hand && joyBtnMap.TryGetValue(pEv.button, out uint vJoyButton))
+            if (pEv.hand == hand && joyBtnMap.TryGetValue(hand, out var map) && map.TryGetValue(pEv.button, out uint vJoyButton))
             {
                 PressButton(vJoyButton);
                 return unpress => UnpressButton(vJoyButton);
@@ -99,7 +130,7 @@ namespace EVRC
 
         private UnpressHandlerDelegate<DirectionActionsPress> OnDirectionPress(DirectionActionsPress pEv)
         {
-            if (pEv.hand == hand && joyHatMap.TryGetValue(pEv.button, out var vJoyButton) && directionMap.TryGetValue(pEv.direction, out var vJoyHat))
+            if (pEv.hand == hand && joyHatMap.TryGetValue(Hand.Right, out var map) && map.TryGetValue(pEv.button, out var vJoyButton) && directionMap.TryGetValue(pEv.direction, out var vJoyHat))
             {
                 SetHatDirection(vJoyButton, vJoyHat);
                 return unpress => ReleaseHatDirection(vJoyButton);
