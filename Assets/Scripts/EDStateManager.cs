@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using System.Diagnostics;
 using UnityEngine;
 using Valve.VR;
+using System.Collections.Generic;
 
 namespace EVRC
 {
@@ -191,13 +192,15 @@ namespace EVRC
         void OnEnable()
         {
             Events.System(EVREventType.VREvent_ProcessConnected).Listen(OnProcessConnected);
-            Events.System(EVREventType.VREvent_ProcessDisconnected).Listen(OnProcessDisconnected);
+            Events.System(EVREventType.VREvent_ProcessDisconnected).Listen(OnProcessDisconnected);            
+            StartCoroutine(PingKey(pingId));
         }
 
         void OnDisable()
         {
             Events.System(EVREventType.VREvent_ProcessConnected).Remove(OnProcessConnected);
             Events.System(EVREventType.VREvent_ProcessDisconnected).Remove(OnProcessDisconnected);
+            pingId++;
         }
 
         private void OnProcessConnected(VREvent_t ev)
@@ -335,47 +338,68 @@ namespace EVRC
             return color;
         }
 
+        List<string> logs = new List<string>();
+        Stopwatch counter = Stopwatch.StartNew();
+        long msSent = 0;
+        int pingId = 0;
+        private IEnumerator PingKey(int id)
+        {
+            logs.Add(counter.ElapsedMilliseconds + ": Ping Starting");
+            while(id == pingId)
+            {
+                KeyboardInterface.Key("Key_1").Send();
+                msSent = counter.ElapsedMilliseconds;
+                yield return new WaitForSecondsRealtime(3f);
+            }
+        }
+
         private IEnumerator WatchStatusFile()
         {
-            while (IsEliteDangerousRunning)
+            logs.Add(counter.ElapsedMilliseconds + ": Watch Starting");
+            using (var shareFile = File.Open(StatusFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using(var streamReader = new StreamReader(shareFile))
             {
-                try
+                while (IsEliteDangerousRunning)
                 {
-                    var text = File.ReadAllText(StatusFilePath);
-                    if (text.Length > 0)
+                    try
                     {
-                        var status = JsonUtility.FromJson<EDStatus>(text);
-
-                        if (LastStatus == null || status.timestamp != LastStatus.Value.timestamp)
+                        shareFile.Seek(0, SeekOrigin.Begin);
+                        var text = streamReader.ReadToEnd();
+                        if (text.Length > 0)
                         {
-                            StatusChanged.Send(status, LastStatus);
-
-                            if (LastStatus == null || LastStatus.Value.GuiFocus != status.GuiFocus)
+                            var status = JsonUtility.FromJson<EDStatus>(text);
+                            
+                            if (LastStatus == null || status.timestamp != LastStatus.Value.timestamp)
                             {
-                                var guiFocus = Enum.IsDefined(typeof(EDStatus_GuiFocus), status.GuiFocus)
-                                    ? (EDStatus_GuiFocus)status.GuiFocus
-                                    : EDStatus_GuiFocus.Unknown;
+                                StatusChanged.Send(status, LastStatus);
 
-                                GuiFocus = guiFocus;
-                                GuiFocusChanged.Send(guiFocus);
+                                if (LastStatus == null || LastStatus.Value.GuiFocus != status.GuiFocus)
+                                {
+                                    var guiFocus = Enum.IsDefined(typeof(EDStatus_GuiFocus), status.GuiFocus)
+                                        ? (EDStatus_GuiFocus)status.GuiFocus
+                                        : EDStatus_GuiFocus.Unknown;
+                                    logs.Add(counter.ElapsedMilliseconds + ": GUIFocus status after " + (counter.ElapsedMilliseconds - msSent));
+                                    GuiFocus = guiFocus;
+                                    GuiFocusChanged.Send(guiFocus);
+                                }
+
+                                if (LastStatus == null || LastStatus.Value.Flags != status.Flags)
+                                {
+                                    StatusFlags = (EDStatus_Flags)status.Flags;
+                                    FlagsChanged.Send(StatusFlags);
+                                }
+
+                                LastStatus = status;
                             }
-
-                            if (LastStatus == null || LastStatus.Value.Flags != status.Flags)
-                            {
-                                StatusFlags = (EDStatus_Flags)status.Flags;
-                                FlagsChanged.Send(StatusFlags);
-                            }
-
-                            LastStatus = status;
                         }
                     }
-                }
-                catch (IOException)
-                {
-                    // Ignore IO exceptions, these might be caused by inevitably reading while ED is writing
-                }
+                    catch (IOException)
+                    {
+                        // Ignore IO exceptions, these might be caused by inevitably reading while ED is writing
+                    }
 
-                yield return new WaitForSecondsRealtime(1f);
+                    yield return new WaitForSecondsRealtime(0.1f);
+                }
             }
         }
 
