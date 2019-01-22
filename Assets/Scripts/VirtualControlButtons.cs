@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace EVRC
@@ -92,10 +93,7 @@ namespace EVRC
             {
                 output.SetButton(btnNumber, false);
             }
-            foreach (uint hatNumber in pressedHatDirections)
-            {
-                pressedHatDirections.Remove(hatNumber);
-            }
+            pressedHatDirections.Clear();
         }
     }
 }

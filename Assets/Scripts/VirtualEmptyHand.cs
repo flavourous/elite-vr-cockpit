@@ -122,11 +122,10 @@ namespace EVRC
 
         private void SetAnalogMode(bool isAnalog)
         {
-            isAnalogMode = isAnalog;
             output.SetStickAxis(new VirtualJoystick.StickAxis(0, 0, 0));
+            isAnalogMode = isAnalog;
         }
 
-        private bool isAnalogMode = false;
 
         private void OnAnalogUpdate(AnalogActionsController.AnalogDirectionAction args)
         {
@@ -134,6 +133,7 @@ namespace EVRC
             output.SetStickAxis(new VirtualJoystick.StickAxis(args.y * 180f, args.x * 180f, 0));
         }
 
+        private static bool isAnalogMode = false;
         private static int nDpress = 0;
 
         private UnpressHandlerDelegate<ButtonActionsPress> OnActionPress(ButtonActionsPress pEv)
