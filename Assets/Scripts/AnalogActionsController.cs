@@ -87,7 +87,7 @@ namespace EVRC
                 if (err == ETrackedPropertyError.TrackedProp_Success)
                 {
                     var axisType = (EVRControllerAxisType)axisTypeInt;
-                    if (axisType == EVRControllerAxisType.k_eControllerAxis_TrackPad)
+                    if (axisType == EVRControllerAxisType.k_eControllerAxis_TrackPad || axisType == EVRControllerAxisType.k_eControllerAxis_Joystick)
                     {
                         var state = new VRControllerState_t();
                         var size = (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VRControllerState_t));
@@ -136,7 +136,7 @@ namespace EVRC
                 if (err == ETrackedPropertyError.TrackedProp_Success)
                 {
                     var axisType = (EVRControllerAxisType)axisTypeInt;
-                    if (axisType == EVRControllerAxisType.k_eControllerAxis_TrackPad)
+                    if (axisType == EVRControllerAxisType.k_eControllerAxis_TrackPad || axisType == EVRControllerAxisType.k_eControllerAxis_Joystick)
                     {
                         trackpadTouchingCoroutineId[hand]++;
                         StartCoroutine(WhileTouchingTouchpadAxis0(ev.trackedDeviceIndex, hand, trackpadTouchingCoroutineId[hand]));
