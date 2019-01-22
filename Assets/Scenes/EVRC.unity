@@ -1218,7 +1218,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   output: {fileID: 2010787711}
-  hand: 2
+  hand: 1
 --- !u!1 &200242373
 GameObject:
   m_ObjectHideFlags: 0
@@ -12224,7 +12224,6 @@ MonoBehaviour:
   menuButton: 1
   trackpadCenterButtonRadius: 0.4
   trackpadDirectionInterval: 0.25
-  joystickDirectionInterval: 0.8
 --- !u!4 &1840785752
 Transform:
   m_ObjectHideFlags: 0
