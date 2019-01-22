@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using static EVRC.ActionsController;
 using static EVRC.PressManager;
@@ -109,20 +110,52 @@ namespace EVRC
             actionsPressManager = new ActionsControllerPressManager(this)
                   .ButtonAction(OnActionPress)
                   .DirectionAction(OnDirectionPress);
+            AnalogActionsController.AnalogDirectionActionUpdate.AddListener(OnAnalogUpdate);
         }
 
         private void StopListening()
         {
             actionsPressManager.Clear();
+            AnalogActionsController.AnalogDirectionActionUpdate.RemoveListener(OnAnalogUpdate);
             ReleaseAllInputs();
         }
+
+        private void SetAnalogMode(bool isAnalog)
+        {
+            isAnalogMode = isAnalog;
+            output.SetStickAxis(new VirtualJoystick.StickAxis(0, 0, 0));
+        }
+
+        private bool isAnalogMode = false;
+
+        private void OnAnalogUpdate(AnalogActionsController.AnalogDirectionAction args)
+        {
+            if (!isAnalogMode) return;
+            output.SetStickAxis(new VirtualJoystick.StickAxis(args.y * 180f, args.x * 180f, 0));
+        }
+
+        private int nDpress = 0;
 
         private UnpressHandlerDelegate<ButtonActionsPress> OnActionPress(ButtonActionsPress pEv)
         {
             if (pEv.hand == hand && joyBtnMap.TryGetValue(hand, out var map) && map.TryGetValue(pEv.button, out uint vJoyButton))
             {
+                var isDpress = pEv.button == BtnAction.D1 || pEv.button == BtnAction.D2;
+
+                if (isDpress) nDpress++;
+
                 PressButton(vJoyButton);
-                return unpress => UnpressButton(vJoyButton);
+
+                if(nDpress==2)
+                {
+                    isAnalogMode = !isAnalogMode;
+                }
+
+                return unpress =>
+                {
+                    if (isDpress) nDpress--;
+                    UnpressButton(vJoyButton);
+                };
             }
 
             return delegate { };
@@ -130,6 +163,8 @@ namespace EVRC
 
         private UnpressHandlerDelegate<DirectionActionsPress> OnDirectionPress(DirectionActionsPress pEv)
         {
+            if (isAnalogMode) return delegate { };
+
             if (pEv.hand == hand && joyHatMap.TryGetValue(Hand.Right, out var map) && map.TryGetValue(pEv.button, out var vJoyButton) && directionMap.TryGetValue(pEv.direction, out var vJoyHat))
             {
                 SetHatDirection(vJoyButton, vJoyHat);
