@@ -134,7 +134,7 @@ namespace EVRC
             output.SetStickAxis(new VirtualJoystick.StickAxis(args.y * 180f, args.x * 180f, 0));
         }
 
-        private int nDpress = 0;
+        private static int nDpress = 0;
 
         private UnpressHandlerDelegate<ButtonActionsPress> OnActionPress(ButtonActionsPress pEv)
         {
