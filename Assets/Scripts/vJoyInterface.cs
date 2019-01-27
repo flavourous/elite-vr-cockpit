@@ -50,6 +50,8 @@ namespace EVRC
         [Range(0f, 100f)]
         public float throttleDeadzonePercentage = 0f;
         [Range(0f, 100f)]
+        public float dialDeadzonePercentage = 0f;
+        [Range(0f, 100f)]
         public float directionalThrustersDeadzonePercentage = 0f;
         [Range(1, 15)]
         public uint deviceId = 1;
@@ -62,6 +64,7 @@ namespace EVRC
 
         private VirtualJoystick.StickAxis stickAxis = VirtualJoystick.StickAxis.Zero;
         private Virtual6DOFController.ThrusterAxis thrusterAxis = Virtual6DOFController.ThrusterAxis.Zero;
+        private float dial = 0f;
         private float throttle = 0f;
         private uint buttons = 0;
         private HatDirection[] hat = new HatDirection[] {
@@ -230,6 +233,11 @@ namespace EVRC
             thrusterAxis = axis;
         }
 
+        public void SetDial(float dial)
+        {
+            this.dial = dial;
+        }
+
         /**
          * Update the throttle
          */
@@ -318,6 +326,9 @@ namespace EVRC
 
             var throttleWithDeadZone = Mathf.Abs(throttle) < (throttleDeadzonePercentage / 100f) ? 0f : throttle;
             iReport.AxisZ = ConvertAxisRatioToAxisInt(throttleWithDeadZone, HID_USAGES.HID_USAGE_Z);
+
+            var dialWithDeadZone = Mathf.Abs(dial) < (dialDeadzonePercentage / 100f) ? 0f : dial;
+            iReport.Dial = ConvertAxisRatioToAxisInt(dialWithDeadZone, HID_USAGES.HID_USAGE_SL1);
 
             iReport.Buttons = buttons;
 
