@@ -13,22 +13,22 @@ namespace EVRC
         private ActionsControllerPressManager actionsPressManager;
 
         // Map of abstracted BtnAction presses to vJoy joystick button numbers
-        private static Dictionary<Hand, Dictionary<BtnAction, uint>> joyBtnMap = new Dictionary<Hand, Dictionary<BtnAction, uint>>
+        private static Dictionary<Hand, Dictionary<BtnAction, uint?>> joyBtnMap = new Dictionary<Hand, Dictionary<BtnAction, uint?>>
         {
             {
                 Hand.Left,
-                new Dictionary<BtnAction, uint>
+                new Dictionary<BtnAction, uint?>
                 {
                     { BtnAction.Trigger, 1 },
                     { BtnAction.Secondary, 2 },
                     { BtnAction.Alt, 3 },
-                    { BtnAction.D1, 4 },
-                    { BtnAction.D2, 5 }
+                    { BtnAction.D1, null },
+                    { BtnAction.D2, null }
                 }
             },
             {
                 Hand.Right,
-                new Dictionary<BtnAction, uint>
+                new Dictionary<BtnAction, uint?>
                 {
                     { BtnAction.Trigger, 7 },
                     { BtnAction.Secondary, 8 },
@@ -134,28 +134,24 @@ namespace EVRC
         }
 
         private static bool isAnalogMode = false;
-        private static int nDpress = 0;
 
         private UnpressHandlerDelegate<ButtonActionsPress> OnActionPress(ButtonActionsPress pEv)
         {
-            if (pEv.hand == hand && joyBtnMap.TryGetValue(hand, out var map) && map.TryGetValue(pEv.button, out uint vJoyButton))
+            if (pEv.hand == hand && joyBtnMap.TryGetValue(hand, out var map) && map.TryGetValue(pEv.button, out uint? vJoyButton))
             {
-                var isDpress = pEv.button == BtnAction.D1 || pEv.button == BtnAction.D2;
+                if (vJoyButton.HasValue)
+                {
+                    PressButton(vJoyButton.Value);
 
-                if (isDpress) nDpress++;
-
-                PressButton(vJoyButton);
-
-                if(nDpress==2)
+                    return unpress =>
+                    {
+                        UnpressButton(vJoyButton.Value);
+                    };
+                }
+                else
                 {
                     isAnalogMode = !isAnalogMode;
                 }
-
-                return unpress =>
-                {
-                    if (isDpress) nDpress--;
-                    UnpressButton(vJoyButton);
-                };
             }
 
             return delegate { };
