@@ -13,22 +13,20 @@ namespace EVRC
         private ActionsControllerPressManager actionsPressManager;
 
         // Map of abstracted BtnAction presses to vJoy joystick button numbers
-        private static Dictionary<Hand, Dictionary<BtnAction, uint?>> joyBtnMap = new Dictionary<Hand, Dictionary<BtnAction, uint?>>
+        private static Dictionary<Hand, Dictionary<BtnAction, uint>> joyBtnMap = new Dictionary<Hand, Dictionary<BtnAction, uint>>
         {
             {
                 Hand.Left,
-                new Dictionary<BtnAction, uint?>
+                new Dictionary<BtnAction, uint>
                 {
                     { BtnAction.Trigger, 1 },
                     { BtnAction.Secondary, 2 },
                     { BtnAction.Alt, 3 },
-                    { BtnAction.D1, null },
-                    { BtnAction.D2, null }
                 }
             },
             {
                 Hand.Right,
-                new Dictionary<BtnAction, uint?>
+                new Dictionary<BtnAction, uint>
                 {
                     { BtnAction.Trigger, 7 },
                     { BtnAction.Secondary, 8 },
@@ -38,6 +36,29 @@ namespace EVRC
                 }
             },
         };
+
+        enum AnalogControlButton { Toggle, LeftAltAxis, RightAltAxis };
+
+        private static Dictionary<Hand, Dictionary<BtnAction, AnalogControlButton>> altBtnMap = new Dictionary<Hand, Dictionary<BtnAction, AnalogControlButton>>
+        {
+            {
+                Hand.Left,
+                new Dictionary<BtnAction, AnalogControlButton>
+                {
+                    { BtnAction.D1, AnalogControlButton.Toggle },
+                    { BtnAction.D2, AnalogControlButton.Toggle },
+                    { BtnAction.Secondary, AnalogControlButton.RightAltAxis },
+                }
+            },
+            {
+                Hand.Right,
+                new Dictionary<BtnAction, AnalogControlButton>
+                {
+                    { BtnAction.Secondary, AnalogControlButton.LeftAltAxis },
+                }
+            },
+        };
+
         private static Dictionary<Hand, Dictionary<DirectionAction, uint>> joyHatMap = new Dictionary<Hand, Dictionary<DirectionAction, uint>>
         {
             {
@@ -120,13 +141,6 @@ namespace EVRC
             ReleaseAllInputs();
         }
 
-        private void SetAnalogMode(bool isAnalog)
-        {
-            output.SetStickAxis(new VirtualJoystick.StickAxis(0, 0, 0));
-            isAnalogMode = isAnalog;
-        }
-
-
         private void OnAnalogUpdate(AnalogActionsController.AnalogDirectionAction args)
         {
             if (!isAnalogMode) return;
@@ -135,33 +149,60 @@ namespace EVRC
             {
                 if (hand == Hand.Left)
                 {
-                    output.SetThrusters(new Virtual6DOFController.ThrusterAxis(new Vector3(args.x, args.y, 0)));
+                    if (altLeft)
+                    {
+                        output.SetThrusters(new Virtual6DOFController.ThrusterAxis(new Vector3(0, 0, args.y)));
+                        output.SetThrottle(args.x);
+                    }
+                    else
+                    {
+                        output.SetThrusters(new Virtual6DOFController.ThrusterAxis(new Vector3(args.x, args.y, 0)));
+                    }
                 }
                 if (hand == Hand.Right)
                 {
-                    output.SetStickAxis(new VirtualJoystick.StickAxis(args.y * 180f, args.x * 180f, 0));
+                    if (altRight)
+                    {
+                        output.SetStickAxis(new VirtualJoystick.StickAxis(0, 0, args.y * 180f));
+                        output.SetDial(args.x);
+                    }
+                    else
+                    {
+                        output.SetStickAxis(new VirtualJoystick.StickAxis(args.y * 180f, args.x * 180f, 0));
+                    }
                 }
             }
         }
 
-        private static bool isAnalogMode = false;
+        private static bool isAnalogMode = false, altLeft = false, altRight = false;
 
         private UnpressHandlerDelegate<ButtonActionsPress> OnActionPress(ButtonActionsPress pEv)
         {
-            if (pEv.hand == hand && joyBtnMap.TryGetValue(hand, out var map) && map.TryGetValue(pEv.button, out uint? vJoyButton))
+            if (pEv.hand == hand)
             {
-                if (vJoyButton.HasValue)
+                if (joyBtnMap.TryGetValue(hand, out var map) && map.TryGetValue(pEv.button, out uint vJoyButton))
                 {
-                    PressButton(vJoyButton.Value);
+                    PressButton(vJoyButton);
 
                     return unpress =>
                     {
-                        UnpressButton(vJoyButton.Value);
+                        UnpressButton(vJoyButton);
                     };
                 }
-                else
+                if (altBtnMap.TryGetValue(hand, out var amap) && amap.TryGetValue(pEv.button, out AnalogControlButton vJoyButtonAlt))
                 {
-                    isAnalogMode = !isAnalogMode;
+                    switch (vJoyButtonAlt)
+                    {
+                        case AnalogControlButton.Toggle:
+                            isAnalogMode = !isAnalogMode;
+                            break;
+                        case AnalogControlButton.LeftAltAxis:
+                            altLeft = true;
+                            return unpress => altLeft = false;
+                        case AnalogControlButton.RightAltAxis:
+                            altRight = true;
+                            return unpress => altRight = false;
+                    }
                 }
             }
 
