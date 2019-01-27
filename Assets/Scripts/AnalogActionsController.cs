@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR;
+using Hand = EVRC.ActionsController.Hand;
 
 namespace EVRC
 {
@@ -39,14 +40,7 @@ namespace EVRC
         };
 
         public static Events.Event<AnalogDirectionAction> AnalogDirectionActionUpdate = new Events.Event<AnalogDirectionAction>();
-
-        public enum Hand
-        {
-            Unknown,
-            Left,
-            Right,
-        }
-
+      
         public enum Direction : byte
         {
             Up,

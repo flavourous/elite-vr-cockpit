@@ -130,7 +130,18 @@ namespace EVRC
         private void OnAnalogUpdate(AnalogActionsController.AnalogDirectionAction args)
         {
             if (!isAnalogMode) return;
-            output.SetStickAxis(new VirtualJoystick.StickAxis(args.y * 180f, args.x * 180f, 0));
+
+            if (args.hand == hand)
+            {
+                if (hand == Hand.Left)
+                {
+                    output.SetThrusters(new Virtual6DOFController.ThrusterAxis(new Vector3(args.x, args.y, 0)));
+                }
+                if (hand == Hand.Right)
+                {
+                    output.SetStickAxis(new VirtualJoystick.StickAxis(args.y * 180f, args.x * 180f, 0));
+                }
+            }
         }
 
         private static bool isAnalogMode = false;
