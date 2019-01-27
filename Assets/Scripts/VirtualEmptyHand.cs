@@ -180,6 +180,25 @@ namespace EVRC
         {
             if (pEv.hand == hand)
             {
+                if (altBtnMap.TryGetValue(hand, out var amap) && amap.TryGetValue(pEv.button, out AnalogControlButton vJoyButtonAlt))
+                {
+                    if (vJoyButtonAlt == AnalogControlButton.Toggle)
+                    {
+                        isAnalogMode = !isAnalogMode;
+                    }
+                    else if(isAnalogMode)
+                    {
+                        switch (vJoyButtonAlt)
+                        {
+                            case AnalogControlButton.LeftAltAxis:
+                                altLeft = true;
+                                return unpress => altLeft = false;
+                            case AnalogControlButton.RightAltAxis:
+                                altRight = true;
+                                return unpress => altRight = false;
+                        }
+                    }
+                }
                 if (joyBtnMap.TryGetValue(hand, out var map) && map.TryGetValue(pEv.button, out uint vJoyButton))
                 {
                     PressButton(vJoyButton);
@@ -188,21 +207,6 @@ namespace EVRC
                     {
                         UnpressButton(vJoyButton);
                     };
-                }
-                if (altBtnMap.TryGetValue(hand, out var amap) && amap.TryGetValue(pEv.button, out AnalogControlButton vJoyButtonAlt))
-                {
-                    switch (vJoyButtonAlt)
-                    {
-                        case AnalogControlButton.Toggle:
-                            isAnalogMode = !isAnalogMode;
-                            break;
-                        case AnalogControlButton.LeftAltAxis:
-                            altLeft = true;
-                            return unpress => altLeft = false;
-                        case AnalogControlButton.RightAltAxis:
-                            altRight = true;
-                            return unpress => altRight = false;
-                    }
                 }
             }
 
