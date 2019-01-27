@@ -146,7 +146,7 @@ namespace EVRC
 
             if (GuiFocus == EDGuiFocus.GalaxyMap || GuiFocus == EDGuiFocus.SystemMap || GuiFocus == EDGuiFocus.Orrery)
             {
-                mode |= CockpitMode.Map;
+                //mode |= CockpitMode.Map; (using emptyhandsciontroller bindings)
             }
             else
             {
