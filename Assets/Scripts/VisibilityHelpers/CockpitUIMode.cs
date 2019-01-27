@@ -21,6 +21,8 @@ namespace EVRC
         public GameObject mainShipOnlyCockpit;
         public GameObject fighterOnlyCockpit;
         public GameObject srvOnlyCockpit;
+        public GameObject leftEmptyHand;
+        public GameObject rightEmptyHand;
         public CockpitModeOverride ModeOverride = CockpitModeOverride.None;
         private EDGuiFocus GuiFocus;
         private EDStatus_Flags StatusFlags;
@@ -205,6 +207,14 @@ namespace EVRC
             if (srvOnlyCockpit)
             {
                 srvOnlyCockpit.SetActive(mode.HasFlag(CockpitMode.Cockpit) && mode.HasFlag(CockpitMode.InSRV));
+            }
+            if(leftEmptyHand)
+            {
+                leftEmptyHand.SetActive(!mode.HasFlag(CockpitMode.MenuMode));
+            }
+            if (rightEmptyHand)
+            {
+                rightEmptyHand.SetActive(!mode.HasFlag(CockpitMode.MenuMode));
             }
 
             Mode = mode;
